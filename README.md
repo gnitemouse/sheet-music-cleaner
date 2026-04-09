@@ -1,7 +1,8 @@
 # sheet-music-cleaner
-<!-- Sheet Music Cleaner | Music Score Scan Tools -->
 
-**v1.0** -- Utilities for cleaning scanned sheet music and normalizing music epub files.
+**v1.0** -- Tools for cleaning and digitizing scanned sheet music PDFs.
+
+Music score ePub file formatter to improve readability across eReader devices.
 
 ---
 
@@ -90,32 +91,34 @@ python epub_fix_format.py input.epub --no-images   # skip image processing
 ```
 
 **Requirements:** Python 3.8+, Pillow (`pip install Pillow`), ImageMagick
-(optional; used for image enhancement)
+(optional, for image enhancement)
 
 ---
 
 ## Typical workflow
 
 ```
-scan -> input.pdf
-             |
-             v
-   clean_sheet_music.ps1              # rasterize, auto-level, sharpen
-             |
-             v
-   clean_<base>/clean_*.tif
-             |
-             +-- pages look good? --> clean_sheet_music.ps1 -final
-             |                                    |
-             +-- need manual edits? --> edit/      |
-                 curate pages, move               |
-                 keepers to out/                  |
-                             |                    |
-                             v                    v
-                        compile_sheet_music.ps1
-                                    |
-                                    v
-                               <base>.pdf
+input.pdf
+    |
+    v
+clean_sheet_music.ps1          # rasterize, auto-level, sharpen
+    |
+    v
+clean_<base>/clean_*.tif       # review output
+    |
+    |  (optional) edit pages manually, move keepers to out/
+    |
+    v
+clean_sheet_music.ps1 -final   # level adjust + deskew
+    |
+    v
+clean_<base>/<base>_*.tif
+    |
+    v
+compile_sheet_music.ps1        # compile TIFFs to PDF
+    |
+    v
+<base>.pdf
 ```
 
 > **External tools:** [ScanTailor Advanced](https://github.com/4lex4/scantailor-advanced)
@@ -143,11 +146,11 @@ than shell scripting.
 
 | Tool | Used by | Notes | Install |
 |------|---------|-------|---------|
-| ImageMagick | all three | required | https://imagemagick.org |
+| ImageMagick | all scripts | required | https://imagemagick.org |
 | Python 3.8+ | `epub_fix_format.py` | required | https://python.org |
-| Pillow | `epub_fix_format.py` | `pip install Pillow` | |
-| pdftk | merging PDFs | optional; better than magick for large files | https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/ |
-| ScanTailor Advanced | manual cleanup | optional; external page editor | https://github.com/4lex4/scantailor-advanced |
+| Pillow | `epub_fix_format.py` | required | `pip install Pillow` |
+| pdftk | merging PDFs | (optional) better than magick for large files | https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/ |
+| ScanTailor Advanced | manual cleanup | (optional) external page editor | https://github.com/4lex4/scantailor-advanced |
 
 ---
 

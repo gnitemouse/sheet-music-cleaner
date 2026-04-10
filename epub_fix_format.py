@@ -1023,37 +1023,6 @@ def normalize_credits(hdr_block: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Helper: is_header_heavy
-# ---------------------------------------------------------------------------
-# Returns True if the combined title + subtitle + credit line count exceeds 3.
-# Used by merge_header_and_first_page to suppress the rights footer when the
-# header already fills most of the title page.
-
-def count_lines_from_block(inner_html: str) -> int:
-    if not inner_html.strip():
-        return 0
-
-    brs = len(_re.findall(r'<br\s*/?>', inner_html, _re.IGNORECASE))
-    return brs + 1
-
-def extract_inner(tag_pattern: str, html: str) -> str:
-    m = _re.search(tag_pattern, html, _re.DOTALL | _re.IGNORECASE)
-    return m.group(1).strip() if m else ''
-
-def is_header_heavy(hdr_block: str) -> bool:
-    title   = extract_inner(r'<h1[^>]*class="title"[^>]*>(.*?)</h1>', hdr_block)
-    subtitle = extract_inner(r'<h3[^>]*class="subtitle"[^>]*>(.*?)</h3>', hdr_block)
-    credit  = extract_inner(r'<h4[^>]*class="credit"[^>]*>(.*?)</h4>', hdr_block)
-
-    title_lines    = count_lines_from_block(title)
-    subtitle_lines = count_lines_from_block(subtitle)
-    credit_lines   = count_lines_from_block(credit)
-
-    total_lines = title_lines + subtitle_lines + credit_lines
-    return total_lines > 3
-
-
-# ---------------------------------------------------------------------------
 # Step 7: merge_header_and_first_page
 # ---------------------------------------------------------------------------
 # Merges music-header + following music-page + following rights into a single
@@ -1160,12 +1129,9 @@ def merge_header_and_first_page(text: str) -> str:
             rights_html = rm.group().strip()
             scan = rm.end()
 
-        # keep_rights suppresses the footer on header-heavy title pages (step 7).
-        # This is a layout decision independent of step 9 (FOOTER_FIRST): even if
-        # step 9 would later move the footer to the last page, injecting it here
-        # when the header is already dense produces one pass of bad layout first.
-        # is_header_heavy acts as a pre-filter so step 9 never sees it on this page.
-        keep_rights = rights_html and not is_header_heavy(hdr_block)
+        # Keep the footer, move_footer_to_page will place it correctly later.
+        # No need to filter it since it's already a short one-liner.
+        keep_rights = bool(rights_html)
 
         footer_block = (
             '\n' + _normalize_footer(rights_html)

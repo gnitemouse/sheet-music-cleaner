@@ -33,6 +33,42 @@ or edit with an external tool such as ScanTailor Advanced before compiling.
 
 ---
 
+### `split_sheet_music.ps1`
+
+Some PDFs are already clean enough to compile directly.
+This script splits such a PDF into individual TIFF pages so they can be
+reviewed, reordered, or compiled immediately.
+
+Unlike `clean_sheet_music.ps1`, no image processing is applied. Pages are
+rasterized to grayscale TIFFs at the requested density (default: 400 dpi).
+
+Output goes into directory `clean_<base>/`, which can be accepted by
+`compile_sheet_music.ps1` with no extra arguments.
+If you want to curate or reorder pages before compiling, move
+keepers into `clean_<base>/out/`.
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `InputPdf` | *(required)* | Path to the source PDF |
+| `-Density` | `400` | Rasterization DPI; increase to `600` for fine print |
+
+**Usage**
+
+```powershell
+.\split_sheet_music.ps1 input.pdf               # split at 400 dpi (default)
+.\split_sheet_music.ps1 input.pdf -Density 300  # split at 300 dpi
+```
+
+Then compile directly:
+
+```powershell
+.\compile_sheet_music.ps1 input.pdf
+```
+
+**Requirements:** ImageMagick (`magick` on PATH)
+
+---
+
 ### `compile_sheet_music.ps1`
 
 Compiles a folder of TIFF pages into a single PDF. Takes the output of
@@ -110,6 +146,27 @@ rewrite pipeline.
 ---
 
 ## Typical workflow
+
+If your source PDF is already clean (good contrast, straight pages), use
+`split_sheet_music.ps1` to go straight to compile:
+
+```
+input.pdf
+    |
+    v
+split_sheet_music.ps1          # rasterize pages, no processing
+    |
+    v
+clean_<base>/<base>_*.tif      # review or reorder; move keepers to out/
+    |
+    v
+compile_sheet_music.ps1        # compile TIFFs to PDF
+    |
+    v
+<base>.pdf
+```
+
+For scanned or low-quality PDFs, use `clean_sheet_music.ps1` instead:
 
 ```
 input.pdf
